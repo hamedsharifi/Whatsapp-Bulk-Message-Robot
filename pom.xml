@@ -58,6 +58,7 @@
 			<version>2.0.0</version>
 		</dependency>
 
+		<!--سورس اینو خودم گرفتم ساختم و clean compile package install زدم-->
 		<dependency>
 			<groupId>com.github.auties00</groupId>
 			<artifactId>whatsappweb4j</artifactId>
