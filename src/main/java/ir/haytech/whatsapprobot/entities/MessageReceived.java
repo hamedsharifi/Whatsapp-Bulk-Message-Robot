@@ -16,7 +16,7 @@ public class MessageReceived {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Timestamp datetime = new Timestamp(System.currentTimeMillis());
-    private String from;
+    private String fromPhone;
     private String message;
 
 

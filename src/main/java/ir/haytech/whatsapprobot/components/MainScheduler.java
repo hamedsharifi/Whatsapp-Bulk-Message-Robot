@@ -5,6 +5,7 @@ import ir.haytech.whatsapprobot.entities.Date;
 import ir.haytech.whatsapprobot.repositories.DateRepository;
 import ir.haytech.whatsapprobot.util.Constants;
 import ir.haytech.whatsapprobot.util.Utility;
+import it.auties.whatsapp4j.protobuf.chat.Chat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -20,6 +21,10 @@ public class MainScheduler {
 
     @Autowired
     private DateRepository dateRepository;
+    @Autowired
+    private WhatsappWebEventManager whatsappWebEventManager;
+    @Autowired
+    private WhatsappWeb whatsappWeb;
 
     Date today;
     java.util.Date startTime;
@@ -29,18 +34,20 @@ public class MainScheduler {
     java.util.Date nextMessageTime;
 
     @Transactional
-    @Scheduled(fixedRate = 1000, initialDelay = 5 * 1000)
+    @Scheduled(fixedRate = 360000, initialDelay = 10 * 1000)
     public void runCommandsToSendMessage() {
-        java.util.Date now = new java.util.Date();
-        if (today.getSentMessageCount() < today.getPermittedMessageCount()) {
-            if (startTime.before(now) && endTime.after(now)) {
-                if (longSleepStartTime.before(now) && now.after(longSleepEndTime)) {
-                    if (now.after(nextMessageTime)) {
-                        sendMessage();
-                        dateRepository.setLastMessageSentTime(new Timestamp(now.getTime()), today.getId());
-                        dateRepository.increaseSentCountByOne(today.getId());
-                        nextMessageTime = new java.util.Date(now.getTime() + Utility.getDelayBeforeNextMessage(today.getPermittedMessageCount(), today.getStartTime(), today.getEndTime()));
-                        System.out.println();
+        if (whatsappWebEventManager.isConnected()) {
+            java.util.Date now = new java.util.Date();
+            if (today.getSentMessageCount() < today.getPermittedMessageCount()) {
+                if (startTime.before(now) && endTime.after(now)) {
+                    if (longSleepStartTime.before(now) && now.after(longSleepEndTime)) {
+                        if (now.after(nextMessageTime)) {
+                            sendMessage();
+                            dateRepository.setLastMessageSentTime(new Timestamp(now.getTime()), today.getId());
+                            dateRepository.increaseSentCountByOne(today.getId());
+                            nextMessageTime = new java.util.Date(now.getTime() + Utility.getDelayBeforeNextMessage(today.getPermittedMessageCount(), today.getStartTime(), today.getEndTime()));
+                            System.out.println();
+                        }
                     }
                 }
             }
@@ -58,6 +65,13 @@ public class MainScheduler {
     }
 
     private void sendMessage() {
-        System.out.println(new java.util.Date());
+        /*var chat = whatsappWeb.getManager().findChatByJid("989933574511@s.whatsapp.net");
+        whatsappWeb.getWhatsappAPI().sendMessage(chat.get(), "I'm Live!");
+        System.out.println(new java.util.Date());*/
+
+        Chat newChat = new Chat();
+        var chat = whatsappWeb.getManager().addChat(newChat.jid("989114900173@s.whatsapp.net"));
+        whatsappWeb.getWhatsappAPI().sendMessage(chat, "I'm Live!");
+
     }
 }
