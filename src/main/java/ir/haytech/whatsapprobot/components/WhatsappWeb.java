@@ -15,20 +15,22 @@ public class WhatsappWeb implements CommandLineRunner {
 
     private WhatsappAPI whatsappAPI;
     private WhatsappDataManager manager;
+    @Autowired
+    private WhatsappWebEventManager webEventManager;
 
     @Override
     public void run(String... args) throws Exception {
         WhatsappConfiguration configuration = WhatsappConfiguration.builder()
                 .whatsappUrl("wss://web.whatsapp.com/ws") // WhatsappWeb's WebSocket URL
-                .requestTag("HaytechRB") // The tag used for requests made to WhatsappWeb's WebSocket
-                .description("HaytechRB") // The description provided to Whatsapp during the authentication process
-                .shortDescription("A new Haytech Project") // An acronym for the description
+                .requestTag("HaytechR") // The tag used for requests made to WhatsappWeb's WebSocket
+                .description("HaytechR") // The description provided to Whatsapp during the authentication process
+                .shortDescription("HaytechR") // An acronym for the description
                 .reconnectWhenDisconnected((reason) -> true) // Determines whether the connection should be reclaimed
                 .async(true) // Determines whether requests sent to whatsapp should be asyncronous or not
                 .build(); // Builds an instance of WhatsappConfiguration
-        whatsappAPI = new WhatsappAPI(configuration);
+        whatsappAPI = new WhatsappAPI();
 
-        whatsappAPI.registerListener(new WhatsappWebEventManager());
+        whatsappAPI.registerListener(webEventManager);
         manager = whatsappAPI.manager();
         whatsappAPI.connect();
     }

@@ -21,8 +21,7 @@ public class MainScheduler {
 
     @Autowired
     private DateRepository dateRepository;
-    @Autowired
-    private WhatsappWebEventManager whatsappWebEventManager;
+
     @Autowired
     private WhatsappWeb whatsappWeb;
 
@@ -34,19 +33,21 @@ public class MainScheduler {
     java.util.Date nextMessageTime;
 
     @Transactional
-    @Scheduled(fixedRate = 360000, initialDelay = 10 * 1000)
+    @Scheduled(fixedRate = 1000, initialDelay = 10 * 1000)
     public void runCommandsToSendMessage() {
-        if (whatsappWebEventManager.isConnected()) {
-            java.util.Date now = new java.util.Date();
-            if (today.getSentMessageCount() < today.getPermittedMessageCount()) {
-                if (startTime.before(now) && endTime.after(now)) {
-                    if (longSleepStartTime.before(now) && now.after(longSleepEndTime)) {
-                        if (now.after(nextMessageTime)) {
-                            sendMessage();
-                            dateRepository.setLastMessageSentTime(new Timestamp(now.getTime()), today.getId());
-                            dateRepository.increaseSentCountByOne(today.getId());
-                            nextMessageTime = new java.util.Date(now.getTime() + Utility.getDelayBeforeNextMessage(today.getPermittedMessageCount(), today.getStartTime(), today.getEndTime()));
-                            System.out.println();
+        if (WhatsappWebEventManager.isConnected()) {
+            if (WhatsappWebEventManager.isReadyToSend()) {
+                java.util.Date now = new java.util.Date();
+                if (today.getSentMessageCount() < today.getPermittedMessageCount()) {
+                    if (startTime.before(now) && endTime.after(now)) {
+                        if (longSleepStartTime.before(now) && now.after(longSleepEndTime)) {
+                            if (now.after(nextMessageTime)) {
+                                sendMessage();
+                                dateRepository.setLastMessageSentTime(new Timestamp(now.getTime()), today.getId());
+                                dateRepository.increaseSentCountByOne(today.getId());
+                                nextMessageTime = new java.util.Date(now.getTime() + Utility.getDelayBeforeNextMessage(today.getPermittedMessageCount(), today.getStartTime(), today.getEndTime()));
+                                System.out.println();
+                            }
                         }
                     }
                 }
@@ -72,6 +73,6 @@ public class MainScheduler {
         Chat newChat = new Chat();
         var chat = whatsappWeb.getManager().addChat(newChat.jid("989114900173@s.whatsapp.net"));
         whatsappWeb.getWhatsappAPI().sendMessage(chat, "I'm Live!");
-
+        System.out.println(new java.util.Date());
     }
 }

@@ -3,10 +3,7 @@ package ir.haytech.whatsapprobot.entities;
 import ir.haytech.whatsapprobot.util.Constants;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Data
@@ -18,5 +15,6 @@ public class MessageSent {
     private Timestamp datetime = new Timestamp(System.currentTimeMillis());
     private String fromPhone = Constants.THIS_ACCOUNT_NUMBER;
     private String toPhone;
+    @Column(columnDefinition = "TEXT")
     private String message;
 }
