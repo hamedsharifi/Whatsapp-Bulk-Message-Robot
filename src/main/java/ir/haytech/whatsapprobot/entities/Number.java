@@ -2,10 +2,7 @@ package ir.haytech.whatsapprobot.entities;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @Entity(name = "numbers")
@@ -14,5 +11,6 @@ public class Number {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     String number;
+    @Column(nullable = true)
     boolean messageSent;
 }
