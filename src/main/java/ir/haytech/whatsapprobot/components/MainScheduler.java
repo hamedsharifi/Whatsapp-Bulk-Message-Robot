@@ -10,6 +10,7 @@ import ir.haytech.whatsapprobot.repositories.NumberRepository;
 import ir.haytech.whatsapprobot.util.Constants;
 import ir.haytech.whatsapprobot.util.Utility;
 import it.auties.whatsapp4j.protobuf.chat.Chat;
+import it.auties.whatsapp4j.response.impl.json.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class MainScheduler {
@@ -84,9 +86,17 @@ public class MainScheduler {
 
         Chat newChat = new Chat();
         var chat = whatsappWeb.getManager().addChat(newChat.jid(number.getNumber() + "@s.whatsapp.net"));
-        whatsappWeb.getWhatsappAPI().sendMessage(chat, Constants.MESSAGE);
+        var sendMessageResult = whatsappWeb.getWhatsappAPI().sendMessage(chat, Constants.MESSAGE);
+
         messageSentRepository.save(MessageSent.builder().message(Constants.MESSAGE).toPhone(number.getNumber()).fromPhone(Constants.THIS_ACCOUNT_NUMBER).datetime(new Timestamp(System.currentTimeMillis())).build());
         numberRepository.deleteById(number.getId());
-        System.out.println(new java.util.Date());
+        System.out.println(new java.util.Date() + "--->" + number.getNumber());
+        try {
+            System.out.println(sendMessageResult.get().status());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 }
