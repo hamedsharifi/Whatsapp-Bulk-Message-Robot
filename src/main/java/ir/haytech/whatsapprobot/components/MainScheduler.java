@@ -10,6 +10,7 @@ import ir.haytech.whatsapprobot.repositories.NumberRepository;
 import ir.haytech.whatsapprobot.util.Constants;
 import ir.haytech.whatsapprobot.util.Utility;
 import it.auties.whatsapp4j.protobuf.chat.Chat;
+import it.auties.whatsapp4j.protobuf.message.standard.ImageMessage;
 import it.auties.whatsapp4j.response.impl.json.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +49,7 @@ public class MainScheduler {
     java.util.Date nextMessageTime;
 
     @Transactional
-    @Scheduled(fixedRate = 1000, initialDelay = 12 * 1000)
+    @Scheduled(fixedRate = 31000, initialDelay = 12 * 1000)
     public void runCommandsToSendMessage() {
         if (WhatsappWebEventManager.isConnected()) {
             if (WhatsappWebEventManager.isReadyToSend()) {
@@ -80,14 +84,36 @@ public class MainScheduler {
     }
 
     private void sendMessage(Number number) {
-        /*var chat = whatsappWeb.getManager().findChatByJid("989933574511@s.whatsapp.net");
-        whatsappWeb.getWhatsappAPI().sendMessage(chat.get(), "I'm Live!");
-        System.out.println(new java.util.Date());*/
+        /*var chat = whatsappWeb.getManager().findChatByJid("989114900173@s.whatsapp.net");
+        try {
+            File file = new File("E:/object1.png");
+            var fileMedia = Files.readAllBytes(file.toPath()); // Read a media from a file
+            var urlMedia = new URL("file:/" + file.toString()).openStream().readAllBytes(); // Read a media from an url
+            var image = ImageMessage.newImageMessage() // Create a new image message builder
+                    .media(urlMedia) // Set the image of this message
+                    .create(); // Create the message
+            whatsappWeb.getWhatsappAPI().sendMessage(chat.get(), image); // Send the image message
+            whatsappWeb.getWhatsappAPI().sendMessage(chat.get(), "I'm Live!");
+            System.out.println(new java.util.Date());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
 
         Chat newChat = new Chat();
         var chat = whatsappWeb.getManager().addChat(newChat.jid(number.getNumber() + "@s.whatsapp.net"));
-        var sendMessageResult = whatsappWeb.getWhatsappAPI().sendMessage(chat, Constants.MESSAGE);
+        try {
+            File file = new File("E:/object1.png");
+            var fileMedia = Files.readAllBytes(file.toPath()); // Read a media from a file
+            var urlMedia = new URL("file:/" + file.toString()).openStream().readAllBytes(); // Read a media from an url
 
+            var image = ImageMessage.newImageMessage() // Create a new image message builder
+                    .media(urlMedia) // Set the image of this message
+                    .create(); // Create the message
+            whatsappWeb.getWhatsappAPI().sendMessage(chat, image); // Send the image message
+            Thread.sleep(100);
+        } catch (Exception e) {
+        }
+        var sendMessageResult = whatsappWeb.getWhatsappAPI().sendMessage(chat, Constants.MESSAGE);
         messageSentRepository.save(MessageSent.builder().message(Constants.MESSAGE).toPhone(number.getNumber()).fromPhone(Constants.THIS_ACCOUNT_NUMBER).datetime(new Timestamp(System.currentTimeMillis())).build());
         numberRepository.deleteById(number.getId());
         System.out.println(new java.util.Date() + "--->" + number.getNumber());
